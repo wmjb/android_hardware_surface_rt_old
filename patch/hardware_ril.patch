@@ -1,0 +1,12 @@
+diff --git a/libril/ril.cpp b/libril/ril.cpp
+index e1d30ea..ce9c7a7 100755
+--- a/libril/ril.cpp
++++ b/libril/ril.cpp
+@@ -3702,6 +3702,7 @@ static void responseSimStatusV5(Parcel &p, void *response) {
+     p.writeInt32(p_cur->universal_pin_state);
+     p.writeInt32(p_cur->gsm_umts_subscription_app_index);
+     p.writeInt32(p_cur->cdma_subscription_app_index);
++    p.writeInt32(-1);
+ 
+     sendSimStatusAppInfo(p, p_cur->num_applications, p_cur->applications);
+ }

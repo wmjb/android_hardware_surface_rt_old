@@ -1,0 +1,45 @@
+ro.opengles.version = 131072
+wifi.interface=wlan0
+rild.libpath=/system/lib/libril-icera.so
+rild.libargs=-e wwan0
+persist.tegra.nvmmlite = 1
+ro.audio.monitorOrientation=true
+
+#NFC
+debug.nfc.fw_download=false
+debug.nfc.se=false
+
+# set default lcd density to TVDPI
+ro.sf.lcd_density=213
+
+# don't preload OpenGL in Zygote, the Tegra drivers do not like it
+ro.zygote.disable_gl_preload=true
+
+# configure PRISM
+persist.tegra.didim.video = 5
+
+
+lpa.use-stagefright=false
+
+
+#permit dex2oat to run more than 6 minutes. comment if you prefer to keep the watchdog
+dalvik.vm.dex2oat-flags=--no-watch-dog
+
+dalvik.vm.dexopt-flags=m=y
+dalvik.vm.heapstartsize=8m
+dalvik.vm.heapgrowthlimit=64m
+dalvik.vm.heapsize=256m
+dalvik.vm.heaputilization=0.25
+dalvik.vm.heapidealfree=8388608
+dalvik.vm.heapconcurrentstart=2097152
+dalvik.vm.stack-trace-file=/data/anr/traces.txt
+
+# zram, zswap, vnswap, swap and memory
+persist.sys.zram_size=167772160
+persist.sys.zram_enable=true
+persist.sys.zswap_size=22
+persist.sys.zswap_zmin=70
+persist.sys.vnswap_enable=false
+persist.sys.vnswap_size=5242880
+persist.sys.ram_minfree=138240
+
