@@ -1,0 +1,41 @@
+<mixer>
+  <!-- These are the initial mixer settings -->
+
+  <path name="speaker">
+    <ctl name="Speaker Switch" value="1" />
+    <ctl name="Speaker Volume" value="121" />
+    <ctl name="Digital Playback Volume" value="96" />
+  </path>
+
+  <path name="headphone">
+    <ctl name="Headphone Switch" value="1" />
+    <ctl name="Headphone Volume" value="121" />
+  </path>
+
+  <path name="dock">
+    <ctl name="Speaker Switch" value="1" />
+    <ctl name="Speaker Volume" value="121" />
+    <ctl name="Digital Playback Volume" value="96" />
+  </path>
+
+  <path name="main-mic-top">
+    <ctl name="MIXINR IN3R Switch" value="1" />
+    <ctl name="MIXINR IN3R Volume" value="7" />
+    <ctl name="Capture Switch" value="1" />
+    <ctl name="Capture Volume" value="63" />
+    <ctl name="Digital Capture Volume" value="127" />
+  </path>
+
+  <path name="main-mic-left">
+    <ctl name="MIXINR IN3R Switch" value="1" />
+    <ctl name="MIXINR IN3R Volume" value="7" />
+    <ctl name="Capture Switch" value="1" />
+    <ctl name="Capture Volume" value="63" />
+    <ctl name="Digital Capture Volume" value="127" />
+
+  </path>
+
+  <path name="headset-mic">
+    <ctl name="MIXINR IN3R Switch" value="1" />
+  </path>
+</mixer>

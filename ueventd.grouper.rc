@@ -1,0 +1,44 @@
+/dev/knvmap     0660    system  system
+/dev/nvmap      0666    system  system
+/dev/tegra_avp  0660    media   media
+/dev/tegra_avpchannel   0660    media   media
+/dev/tegra_rpc  0660    media   media
+/dev/tegra_sema	0660    media   media
+/dev/tegra_mediaserver  0660    media   media
+/dev/tegra_camera 0660  media   camera
+/dev/camera*    0660    media   camera
+/dev/focuser*   0660    media   camera
+/dev/torch*     0660    media   camera
+/dev/video0     0660    media   camera
+/dev/video1     0660    media   camera
+/dev/spdif*     0660    system  audio
+/dev/tegra_dc*  0660    system  system
+/dev/ttyACM*    0660    radio   system
+/dev/ttyACM2    0660    radio   log
+/dev/nvhost-ctrl	0666	root	root
+/dev/nvhost-display	0000	root	root
+/dev/nvhost-dsi	0000	root	root
+/dev/nvhost-gr2d	0666	root	root
+/dev/nvhost-gr3d	0666	root	root
+/dev/nvhost-isp	0660	media	media
+/dev/nvhost-mpe	0660	media	media
+/dev/nvhost-vi	0660	media	media
+/dev/tf_driver  0660    drmrpc	drmrpc
+/dev/timerinfo  0440    system  system
+/dev/cpu_freq_min	0660	system	system
+/dev/cpu_freq_max	0660	system	system
+/dev/min_online_cpus	0660	system	system
+/dev/max_online_cpus	0660	system	system
+
+
+/sys/devices/system/cpu/cpu*   cpufreq/scaling_governor   0660  system system
+/sys/devices/system/cpu/cpu*   cpufreq/scaling_min_freq   0660  system system
+/sys/devices/system/cpu/cpu*   cpufreq/scaling_max_freq   0660  system system
+
+/sys/devices/system/cpu/cpuquiet balanced/balance_level    0660 system system
+/sys/devices/system/cpu/cpuquiet balanced/up_delay         0660 system system
+/sys/devices/system/cpu/cpuquiet balanced/down_delay       0660 system system
+/sys/devices/system/cpu/cpuquiet balanced/idle_bottom_freq 0660 system system
+/sys/devices/system/cpu/cpuquiet balanced/idle_top_freq    0660 system system
+
+
