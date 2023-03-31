@@ -14,46 +14,67 @@
 # limitations under the License.
 #
 
-# Local variables (can be duplicate from BoardConfig.mk)
-TARGET_NO_SUPERUSER := false
+PRODUCT_CHARACTERISTICS := tablet,nosdcard
+PRODUCT_AAPT_CONFIG := normal large xlarge hdpi
+PRODUCT_AAPT_PREF_CONFIG := hdpi
 
-ifeq ($(TARGET_PREBUILT_KERNEL),)
-  LOCAL_KERNEL := device/asus/grouper/kernel
-else
-  LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
-endif
-
-PRODUCT_AAPT_CONFIG := normal large
-PRODUCT_AAPT_PREF_CONFIG := tvdpi
 # A list of dpis to select prebuilt apk, in precedence order.
 PRODUCT_AAPT_PREBUILT_DPI := hdpi
 
+TARGET_HAS_LEGACY_CAMERA_HAL1 := true
+
 PRODUCT_PROPERTY_OVERRIDES := \
-    wifi.interface=wlan0 \
-    wifi.supplicant_scan_interval=15 \
-    tf.enable=y \
-    persist.sys.media.legacy-drm=true \
     drm.service.enabled=true \
+    persist.sys.media.legacy-drm=true \
     media.stagefright.less-secure=true \
-    media.stagefright.legacyencoder=true
+    media.stagefright.legacyencoder=true \
+    tf.enable=y \
+    wifi.interface=wlan0 \
+    wifi.supplicant_scan_interval=15
+
+#--------------------------------------------------------------------------------------------------
+# check for 7.x (normally starting with 8.1)
+#--------------------------------------------------------------------------------------------------
+# disable Captive portal check
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.disable_captive_portal=1
+
+# Set lowram options
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.lmk.critical_upgrade=true \
+    ro.lmk.upgrade_pressure=40
+
+# Speed profile services and wifi-service to reduce RAM and storage.
+PRODUCT_SYSTEM_SERVER_COMPILER_FILTER := speed-profile
+# Always preopt extracted APKs to prevent extracting out of the APK for gms
+# modules.
+PRODUCT_ALWAYS_PREOPT_EXTRACTED_APK := true
+# Default heap sizes. Allow up to 256m for large heaps to make sure a single app
+# doesn't take all of the RAM.
+PRODUCT_PROPERTY_OVERRIDES += dalvik.vm.heapgrowthlimit=192m
+PRODUCT_PROPERTY_OVERRIDES += dalvik.vm.heapsize=512m
+
+#--------------------------------------------------------------------------------------------------
+
+# ART
+PRODUCT_PROPERTY_OVERRIDES += \
+		dalvik.vm.dex2oat-flags=--no-watch-dog \
+		dalvik.vm.dex2oat-swap=true \
+		ro.sys.fw.dex2oat_thread_count=4
 
 # libhwui flags
 PRODUCT_PROPERTY_OVERRIDES += \
     debug.hwui.render_dirty_regions=false
 
-# Set default USB interface
-PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
-    persist.sys.usb.config=mtp
-
-include frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk
+include frameworks/native/build/tablet-10in-xhdpi-2048-dalvik-heap.mk
 
 PRODUCT_COPY_FILES += \
-    $(LOCAL_KERNEL):kernel \
     device/asus/grouper/ueventd.grouper.rc:root/ueventd.grouper.rc \
     device/asus/grouper/init.grouper.usb.rc:root/init.grouper.usb.rc \
-    device/asus/grouper/gps.conf:system/etc/gps.conf \
-    device/asus/grouper/touch_fw_update.sh:system/bin/touch_fw_update.sh \
-    device/asus/grouper/gps_daemon.sh:system/bin/gps_daemon.sh
+    device/asus/grouper/set_hwui_params.sh:system/bin/set_hwui_params.sh
+
+PRODUCT_PACKAGES += \
+    libstlport
 
 ifneq ($(TARGET_PREBUILT_WIFI_MODULE),)
 PRODUCT_COPY_FILES += \
@@ -76,8 +97,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.ethernet.xml:system/etc/permissions/android.hardware.ethernet.xml
 
 PRODUCT_COPY_FILES += \
-    device/asus/grouper/elan-touchscreen.idc:system/usr/idc/elan-touchscreen.idc \
-    device/asus/grouper/raydium_ts.idc:system/usr/idc/raydium_ts.idc \
     device/asus/grouper/sensor00fn11.idc:system/usr/idc/sensor00fn11.idc \
     device/asus/grouper/gpio-keys.kl:system/usr/keylayout/gpio-keys.kl
 
@@ -93,36 +112,36 @@ PRODUCT_PACKAGES += \
     libdgv1
 
 PRODUCT_PACKAGES += \
+    libhealthd.tegra3 \
     lights.grouper \
-    audio.primary.grouper \
+    audio.primary.tegra \
     power.grouper \
     audio.a2dp.default \
     audio.usb.default \
     audio.r_submix.default \
     librs_jni \
+    libemoji \
     l2ping \
     hcitool \
     bttest \
+    libaudioutils \
+    libtinyalsa \
     com.android.future.usb.accessory
+
 
 PRODUCT_PACKAGES += \
     keystore.grouper
-
-# NFC packages
-PRODUCT_PACKAGES += \
-    nfc.grouper \
-    libnfc\
-    Nfc \
-    Tag
 
 # Filesystem management tools
 PRODUCT_PACKAGES += \
     fsck.f2fs \
     mkfs.f2fs \
-    e2fsck \
-    setup_fs
+    e2fsck
 
-PRODUCT_CHARACTERISTICS := tablet,nosdcard
+# IPv6 tethering
+PRODUCT_PACKAGES += \
+    ebtables \
+    ethertypes
 
 # we have enough storage space to hold precise GC data
 PRODUCT_TAGS += dalvik.gc.type-precise
@@ -146,62 +165,22 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/asus/grouper/audio_policy.conf:system/etc/audio_policy.conf
 
-PRODUCT_COPY_FILES += \
-    frameworks/native/data/etc/com.nxp.mifare.xml:system/etc/permissions/com.nxp.mifare.xml \
-    frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml
-
-WIFI_BAND := 802_11_BG
- $(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4330/device-bcm.mk)
-
-
-# nAOSP changes
-
-# Superuser
-ifneq ($(TARGET_NO_SUPERUSER),true)
-
 PRODUCT_PACKAGES += \
-    su
+    libstagefrighthw
 
-PRODUCT_PROPERTY_OVERRIDES += \
-    persist.sys.root_access=3
-
-endif
-
-PRODUCT_PACKAGES += \
-    Launcher3
-
-# Busybox
-PRODUCT_PACKAGES += \
-    busybox
-
-# Boot Animation
-PRODUCT_COPY_FILES += \
-    device/asus/grouper/bootanimation.zip:system/media/bootanimation.zip
-
-# ROM Updater
-ifeq ($(ROM_BUILD_NUM),)
-  $(error No ROM_BUILD_NUM defined. please export the value (export ROM_BUILD_NUM=xx))
-endif
-
-PRODUCT_PACKAGES += \
-    ROMUpdater
-
-# ViPER4Android
-PRODUCT_PACKAGES += \
-    ViPER4Android \
-    libv4a_fx_ics
-
-PRODUCT_COPY_FILES += \
-    device/asus/grouper/audio_effects.conf:system/etc/audio_effects.conf \
-    packages/apps/ViPER4AndroidFX/android_4.x-5.x/libs/armeabi/libV4AJniUtils.so:system/app/ViPER4Android/lib/arm/libV4AJniUtils.so
-
-# PerformanceControl
 PRODUCT_PACKAGES += \
     PerformanceControl
 
-# Backup Tool
-PRODUCT_COPY_FILES += \
-    device/asus/grouper/custom/backuptool/backuptool.sh:install/bin/backuptool.sh \
-    device/asus/grouper/custom/backuptool/backuptool.functions:install/bin/backuptool.functions \
-    device/asus/grouper/custom/backuptool/50-base.sh:system/addon.d/50-base.sh
+WIFI_BAND := 802_11_BG
+PRODUCT_DEFAULT_WIFI_CHANNELS := 13
+
+ $(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4330/device-bcm.mk)
+
+# inherit from the non-open-source side
+$(call inherit-product, vendor/asus/grouper/asus-vendor.mk)
+$(call inherit-product, vendor/broadcom/grouper/broadcom-vendor.mk)
+$(call inherit-product, vendor/elan/grouper/elan-vendor.mk)
+$(call inherit-product, vendor/invensense/grouper/invensense-vendor.mk)
+$(call inherit-product, vendor/nvidia/grouper/nvidia-vendor.mk)
+$(call inherit-product-if-exists, vendor/widevine/arm-generic/widevine-vendor.mk)
 

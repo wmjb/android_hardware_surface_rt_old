@@ -3,26 +3,25 @@ import init.grouper.usb.rc
 on early-init
     # Set init and its forked children's oom_adj.
     write /proc/1/oom_score_adj -1000
-
-    mount debugfs debugfs /sys/kernel/debug
+    mount -t debugfs debugfs /sys/kernel/debug
+    chmod 0755 /sys/kernel/debug/tracing
+    mount -t cgroup -o timer_slack none /sys/fs/cgroup
+#    write /sys/fs/cgroup/timer_slack.min_slack_ns 250000
 
 on init
     symlink /sdcard /storage/sdcard0
 
 on early-boot
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
-    write /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor interactive
-    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor interactive
-    write /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor interactive
-
+    setprop ro.audio.flinger_standbytime_ms 15000
+   
 on fs
     setprop ro.crypto.umount_sd false
     mount_all /fstab.grouper
     swapon_all /fstab.grouper
+    mkdir /per 0700 root root
+    mount vfat /dev/block/platform/sdhci-tegra.3/by-name/PER /per ro context=u:object_r:oemfs:s0
 
 on post-fs-data
-    mkdir /data/media 0770 media_rw media_rw
-
     # change back to bluetooth from system
     chown bluetooth net_bt_stack /data/misc/bluetooth
 
@@ -38,17 +37,6 @@ on post-fs-data
     mkdir /data/calibration
     mkdir /data/amit
 
-    # gps
-    mkdir /data/gps
-    chown gps system /data/gps
-    chmod 1770 /data/gps
-    write /sys/class/gpio/export 162
-    write /sys/class/gpio/gpio162/value 0
-    write /sys/class/gpio/gpio162/direction out
-    chown gps system /sys/class/gpio/gpio162/value
-    chmod 0644 /sys/class/gpio/gpio162/value
-    chown gps system /dev/ttyHS1
-    chmod 0660 /dev/ttyHS1
 
     # Set indication (checked by vold) that we have finished this action
     setprop vold.post_fs_data_done 1
@@ -78,10 +66,6 @@ on boot
     chown bluetooth net_bt_stack /proc/bluetooth/sleep/lpm
     chown bluetooth net_bt_stack /proc/bluetooth/sleep/btwrite
 
-# NFC
-    setprop ro.nfc.port "I2C"
-    chmod 0660 /dev/pn544
-    chown nfc nfc /dev/pn544
 
 # backlight
     chown system system /sys/class/backlight/pwm-backlight/brightness
@@ -89,11 +73,94 @@ on boot
 # didim
     chown system system /sys/class/graphics/fb0/device/smartdimmer/enable
     chown system system /sys/class/graphics/fb0/device/smartdimmer/aggressiveness
+    chown system system /sys/class/graphics/fb0/device/smartdimmer/phase_in_adjustments
 
 # power
     chown system system /sys/kernel/tegra_cap/core_cap_level
     chown system system /sys/kernel/tegra_cap/core_cap_state
     chown system system /sys/module/cpu_tegra/parameters/cpu_user_cap
+    chown system system /sys/kernel/cluster/active
+
+    # Setting the cpuquiet governor resets the sysfs permissions, so we set it here
+    write /sys/devices/system/cpu/cpuquiet/current_governor balanced
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp 0
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/enable 1
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_bottom_freq 102000
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_top_freq 620000
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/down_delay 60
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/up_delay 60
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/mp_overhead 20
+    write /sys/module/cpuidle/parameters/lp2_in_idle 0
+    write /sys/devices/system/cpu/cpuquiet/balanced/idle_bottom_freq 102000
+    write /sys/devices/system/cpu/cpuquiet/balanced/idle_top_freq 620000
+    write /sys/devices/system/cpu/cpuquiet/balanced/down_delay 60
+    write /sys/devices/system/cpu/cpuquiet/balanced/up_delay 60
+
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/down_delay
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/up_delay
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/enable
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_bottom_freq
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_top_freq
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/mp_overhead
+    chown system system /sys/devices/system/cpu/cpuquiet/current_governor
+    chown system system /sys/devices/system/cpu/cpuquiet/balanced/idle_bottom_freq
+    chown system system /sys/devices/system/cpu/cpuquiet/balanced/idle_top_freq
+    chown system system /sys/devices/system/cpu/cpuquiet/balanced/down_delay
+    chown system system /sys/devices/system/cpu/cpuquiet/balanced/up_delay
+    chown system system /sys/devices/platform/host1x/nvavp/boost_sclk
+    chown system system /sys/devices/tegradc.0/enable
+    chown system system /sys/devices/host1x/gr3d/enable_3d_scaling
+
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/down_delay
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/up_delay
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/enable
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_bottom_freq
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_top_freq
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/mp_overhead
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/current_governor
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/balanced/idle_bottom_freq
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/balanced/idle_top_freq
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/balanced/down_delay
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/balanced/up_delay
+    chmod 0660 /sys/devices/platform/host1x/nvavp/boost_sclk
+    chmod 0660 /sys/devices/tegradc.0/enable
+    chmod 0660 /sys/devices/host1x/gr3d/enable_3d_scaling
+    chmod 0660 /sys/kernel/cluster/active
+
+    # CPU Input Boost
+    write /sys/module/cpu_input_boost/parameters/up_threshold 30
+    write /sys/module/cpu_input_boost/parameters/enabled 1
+
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
+    chown system system /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+    chown system system /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+
+
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chmod 0660 /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
+    chmod 0660 /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+    chmod 0660 /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+    chmod 0660 /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+    chmod 0660 /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+    chmod 0660 /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+
 
 # Sensor
 # iio
@@ -240,48 +307,41 @@ on boot
     chmod 600 /sys/bus/iio/devices/iio:device1/scan_elements/in_timestamp_en
     chmod 600 /sys/bus/iio/devices/iio:device1/trigger/current_trigger
 
-# Power management settings
-    write /sys/module/cpu_tegra3/parameters/no_lp 0
-    #write /sys/module/tegra3_emc/parameters/emc_enable 0
-    #write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 1000000
-    write /sys/devices/system/cpu/cpufreq/interactive/boost_factor 2
-    write /sys/devices/system/cpu/cpufreq/interactive/input_boost 1
-    write /sys/devices/system/cpu/cpufreq/interactive/sustain_load 80
-    write /sys/module/cpu_tegra3/parameters/auto_hotplug 1
-    #write /sys/module/cpuidle_t3/parameters/lp2_0_in_idle 0
-    write /sys/module/cpuidle/parameters/lp2_in_idle 0
+    chown system system /sys/module/cpuidle/parameters/lp2_in_idle
+    chown system system /sys/module/intelli_plug/parameters/nr_run_profile_sel
+    chown system system /sys/module/intelli_plug/parameters/cpu_nr_run_threshold
+    chown system system /sys/module/intelli_plug/parameters/nr_run_hysteresis
+    chown system system /sys/module/intelli_plug/parameters/screen_off_max
+    chown system system /sys/module/intelli_plug/parameters/intelli_plug_active
+    chown system system /sys/module/lowmemorykiller/parameters/adj
+    chown system system /sys/module/lowmemorykiller/parameters/debug
+    chown system system /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk
+    chown system system /sys/module/lowmemorykiller/parameters/minfree
+    chown system system /sys/module/lowmemorykiller/parameters/vmpressure_file_min
 
-# Interactive governor settings
-    chown system system /sys/devices/system/cpu/cpufreq/interactive/boost_factor
-    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/boost_factor
-    chown system system /sys/devices/system/cpu/cpufreq/interactive/core_lock_count
-    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/core_lock_count
-    chown system system /sys/devices/system/cpu/cpufreq/interactive/core_lock_period
-    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/core_lock_period
-    chown system system /sys/devices/system/cpu/cpufreq/interactive/go_maxspeed_load
-    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/go_maxspeed_load
-    chown system system /sys/devices/system/cpu/cpufreq/interactive/io_is_busy
-    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/io_is_busy
-    chown system system /sys/devices/system/cpu/cpufreq/interactive/max_boost
-    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/max_boost
-    chown system system /sys/devices/system/cpu/cpufreq/interactive/sustain_load
-    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/sustain_load
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-    chown system system /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
-    chmod 0660 /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
-    chown system system /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
-    chmod 0660 /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
-    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
-    chmod 0660 /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
-    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
-    chmod 0660 /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
-    chown system system /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
-    chmod 0660 /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
-    chown system system /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
-    chmod 0660 /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+    chmod 0660 /sys/module/cpuidle/parameters/lp2_in_idle
+    chmod 0660 /sys/module/intelli_plug/parameters/nr_run_profile_sel
+    chmod 0600 /sys/module/intelli_plug/parameters/cpu_nr_run_threshold
+    chmod 0600 /sys/module/intelli_plug/parameters/nr_run_hysteresis
+    chmod 0600 /sys/module/intelli_plug/parameters/screen_off_max
+    chmod 0600 /sys/module/intelli_plug/parameters/intelli_plug_active
+    chmod 0660 /sys/module/lowmemorykiller/parameters/adj
+    chmod 0660 /sys/module/lowmemorykiller/parameters/debug
+    chmod 0660 /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk
+    chmod 0660 /sys/module/lowmemorykiller/parameters/minfree
+    chmod 0660 /sys/module/lowmemorykiller/parameters/vmpressure_file_min
+
+# Power management settings
+    chown system system /sys/kernel/tegra_cap/core_cap_level
+    chown system system /sys/kernel/tegra_cap/core_cap_state
+    chown system system /sys/module/cpu_tegra/parameters/cpu_user_cap
+    chown system system /sys/devices/system/cpu/cpufreq/cpuload/enable
+    chown system system /sys/devices/system/cpu/cpuquiet/current_governor
+    # Setting the cpuquiet governor resets the sysfs permissions, so we set it here
+    write /sys/devices/system/cpu/cpuquiet/current_governor balanced
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/enable 1
+    write /sys/module/cpuidle_t3/parameters/lp2_0_in_idle 0
+    restorecon_recursive /sys/devices/system/cpu/cpuquiet/balanced
 
 # Double tap to wake settings
     chown system system /sys/android_touch/doubletap_wake
@@ -290,24 +350,55 @@ on boot
     chmod 0664 /sys/android_touch/dt_delta_limit
     chown system system /sys/android_touch/dt_timeout
     chmod 0664 /sys/android_touch/dt_timeout
+    write /sys/android_touch/doubletap_wake 1
 
 # Default Read Ahead value for sdcards
-    write /sys/block/mmcblk0/queue/read_ahead_kb 2048
-    write /sys/block/mmcblk1/queue/read_ahead_kb 2048
-
-# Load WiFi driver
-
-# BB mapping symbolic name to the logging ttyACM port
-    symlink /dev/ttyACM2 /dev/log_modem
+#    write /sys/block/mmcblk0/queue/scheduler cfq
+    write /sys/block/mmcblk0/queue/read_ahead_kb 256
+    write /sys/block/mmcblk0/queue/nr_requests 256
+    write /sys/block/mmcblk0/queue/add_random 0
+    write /sys/block/mmcblk0/queue/rq_affinity 1
+    write /sys/block/mmcblk0/queue/iosched/slice_idle 0
+    write /sys/block/mmcblk0/queue/iosched/group_idle 0
+    write /sys/block/mmcblk0/queue/iosched/back_seek_penalty 1
+    write /sys/block/mmcblk0/queue/iosched/quantum 8
+    write /sys/block/mmcblk0/queue/iosched/slice_async 40
+    write /sys/block/mmcblk0/queue/iosched/slice_sync 100
+    write /sys/block/mmcblk0/queue/iosched/fifo_expire_async 250
+    write /sys/block/mmcblk0/queue/iosched/fifo_expire_sync 120
+#    write /sys/block/mmcblk0/queue/iosched/slice_async_rq 4
+#    write /sys/block/mmcblk0/queue/iosched/back_seek_max 2147483647
+#    write /sys/block/mmcblk0/queue/iosched/target_latency 300
 
 # initialize KSM
-    write /sys/kernel/mm/ksm/pages_to_scan 100
-    write /sys/kernel/mm/ksm/sleep_millisecs 500
+    write /sys/kernel/mm/ksm/deferred_timer 1
+    write /sys/kernel/mm/ksm/pages_to_scan 256
+    write /sys/kernel/mm/ksm/sleep_millisecs 1500
     write /sys/kernel/mm/ksm/run 1
 
 # config swap
-    write /proc/sys/vm/page-cluster 0
+    write /proc/sys/vm/page-cluster 1
     write /proc/sys/vm/swappiness 100
+    write /proc/sys/vm/dirty_ratio 15
+    write /proc/sys/vm/dirty_background_ratio 5
+    write /proc/sys/vm/dirty_writeback_centisecs 400
+    write /proc/sys/vm/min_free_kbytes 3072 
+#    write /sys/block/zram0/max_comp_streams 2
+
+
+# some additional performance tweaks (to be tested
+    write /sys/module/lowmemorykiller/parameters/adj "0,300,600,800,900,906"
+    write /sys/module/lowmemorykiller/parameters/minfree "15360,19200,23040,26880,34415,43737"
+    write /sys/module/lowmemorykiller/parameters/cost 48
+    # Enable Adaptive LMK
+    write /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk 1
+    write /sys/module/lowmemorykiller/parameters/vmpressure_file_min 49152
+#    write /sys/devices/tegradc.0/smartdimmer/enable 0
+#   write /sys/devices/host1x/gr3d/enable_3d_scaling 1
+
+# stop ril-daemon if this is a wifi-only device
+on property:ro.carrier=wifi-only
+    stop ril-daemon
 
 service wpa_supplicant /system/bin/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
@@ -338,48 +429,48 @@ service p2p_supplicant /system/bin/wpa_supplicant \
     disabled
     oneshot
 
-#Sensor: load calibration files.
-service sensors-config /system/bin/sensors-config
-    class main
-    user root
-    oneshot
-#Sensor load calibration files end
-
-# bugreport is triggered by the VOLUME-DOWN and VOLUME-UP keys
-service bugreport /system/bin/dumpstate -d -p -B \
-        -o /data/data/com.android.shell/files/bugreports/bugreport
+service dhcpcd_wlan0 /system/bin/dhcpcd -aABDKL
     class main
     disabled
     oneshot
-    keycodes 115 114
 
-
-# Recovery daemon: configure MSC partition
-service recoveryd /system/bin/recoveryd /dev/block/platform/sdhci-tegra.3/by-name/MSC
+service dhcpcd_eth0 /system/bin/dhcpcd -ABDKL -f/system/etc/dhcpcd/dhcpcd.conf
+    class main
     disabled
+    oneshot
+
+service dhcpcd_bt-pan /system/bin/dhcpcd -ABKL
+    class main
+    disabled
+    oneshot
+
+service iprenew_wlan0 /system/bin/dhcpcd -n
+    class main
+    disabled
+    oneshot
+
+service iprenew_eth0 /system/bin/dhcpcd -n
+    class main
+    disabled
+    oneshot
+
+service iprenew_bt-pan /system/bin/dhcpcd -n
+    class main
+    disabled
+    oneshot
+
+# set hwui properties depending on the screen resolution and the memory size
+service set_hwui_params /system/bin/set_hwui_params.sh
     class main
     user root
     group root
     oneshot
 
-on property:sys.shutdown.requested=1recovery
-    start recoveryd
+on property:ro.build.type=userdebug
+    start adbd
 
-# start tf_daemon service
-service tf_daemon /system/bin/tf_daemon -storageDir /data/tf -d
+service sensors-calib /system/bin/sensors-load-calibration.sh
     class main
     user root
-    group shell
-
-# may restart due to /data/tf not existing yet
-on property:init.svc.tf_daemon=restarting
-    mkdir /data/tf
-
-# create filesystems if necessary
-service setup_fs /system/bin/setup_fs \
-        /dev/block/platform/sdhci-tegra.3/by-name/UDA \
-        /dev/block/platform/sdhci-tegra.3/by-name/CAC
-    class core
-    user root
-    group root
     oneshot
+

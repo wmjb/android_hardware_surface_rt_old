@@ -67,7 +67,7 @@ struct PKCS8_PRIV_KEY_INFO_Delete {
 };
 typedef UniquePtr<PKCS8_PRIV_KEY_INFO, PKCS8_PRIV_KEY_INFO_Delete> Unique_PKCS8_PRIV_KEY_INFO;
 
-typedef UniquePtr<keymaster0_device_t> Unique_keymaster0_device_t;
+typedef UniquePtr<keymaster0_device_t> Unique_keymaster_device_t;
 
 typedef UniquePtr<CK_BYTE[]> Unique_CK_BYTE;
 
@@ -218,7 +218,7 @@ static void logOpenSSLError(const char* location) {
  * Convert from OpenSSL's BIGNUM format to TEE's Big Integer format.
  */
 static ByteArray* bignum_to_array(const BIGNUM* bn) {
-    const unsigned int bignumSize = BN_num_bytes(bn);
+    size_t bignumSize = BN_num_bytes(bn);
 
     Unique_CK_BYTE bytes(new CK_BYTE[bignumSize]);
 
@@ -610,7 +610,7 @@ static int tee_import_keypair(const keymaster0_device_t* dev,
     return keyblob_save(objId.get(), key_blob, key_blob_length);
 }
 
-static int tee_get_keypair_public(const struct keymaster0_device* dev,
+static int tee_get_keypair_public(const keymaster0_device* dev,
         const uint8_t* key_blob, const size_t key_blob_length,
         uint8_t** x509_data, size_t* x509_data_length) {
 
@@ -722,7 +722,7 @@ static int tee_get_keypair_public(const struct keymaster0_device* dev,
     return 0;
 }
 
-static int tee_delete_keypair(const struct keymaster0_device* dev,
+static int tee_delete_keypair(const keymaster0_device_t* dev,
             const uint8_t* key_blob, const size_t key_blob_length) {
 
     CryptoSession session(reinterpret_cast<CK_SESSION_HANDLE>(dev->context));
@@ -902,7 +902,7 @@ static int tee_open(const hw_module_t* module, const char* name,
     if (strcmp(name, KEYSTORE_KEYMASTER) != 0)
         return -EINVAL;
 
-    Unique_keymaster0_device_t dev(new keymaster0_device_t);
+    Unique_keymaster_device_t dev(new keymaster0_device_t);
     if (dev.get() == NULL)
         return -ENOMEM;
 

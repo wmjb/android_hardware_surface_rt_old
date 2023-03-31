@@ -3,11 +3,8 @@
 /dev/tegra_avp  0660    media   media
 /dev/tegra_avpchannel   0660    media   media
 /dev/tegra_rpc  0660    media   media
-/dev/tegra_avpchannel   0660    media   media
 /dev/tegra_sema	0660    media   media
 /dev/tegra_mediaserver  0660    media   media
-/dev/ov2710     0660    media   camera
-/dev/mi1040     0660    media   camera
 /dev/tegra_camera 0660  media   camera
 /dev/camera*    0660    media   camera
 /dev/focuser*   0660    media   camera
@@ -27,7 +24,21 @@
 /dev/nvhost-mpe	0660	media	media
 /dev/nvhost-vi	0660	media	media
 /dev/tf_driver  0660    drmrpc	drmrpc
-#for FM V4L2 Radio
-/dev/radio      0666    system  radio
-/dev/ion        0666    system  system
-/dev/pn544      0660    nfc     nfc
+/dev/timerinfo  0440    system  system
+/dev/cpu_freq_min	0660	system	system
+/dev/cpu_freq_max	0660	system	system
+/dev/min_online_cpus	0660	system	system
+/dev/max_online_cpus	0660	system	system
+
+
+/sys/devices/system/cpu/cpu*   cpufreq/scaling_governor   0660  system system
+/sys/devices/system/cpu/cpu*   cpufreq/scaling_min_freq   0660  system system
+/sys/devices/system/cpu/cpu*   cpufreq/scaling_max_freq   0660  system system
+
+/sys/devices/system/cpu/cpuquiet balanced/balance_level    0660 system system
+/sys/devices/system/cpu/cpuquiet balanced/up_delay         0660 system system
+/sys/devices/system/cpu/cpuquiet balanced/down_delay       0660 system system
+/sys/devices/system/cpu/cpuquiet balanced/idle_bottom_freq 0660 system system
+/sys/devices/system/cpu/cpuquiet balanced/idle_top_freq    0660 system system
+
+

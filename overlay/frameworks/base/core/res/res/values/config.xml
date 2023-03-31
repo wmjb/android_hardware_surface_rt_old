@@ -41,6 +41,11 @@
         <item>"ethernet,9,9,9,-1,true"</item>
     </string-array>
 
+    <integer-array name="config_protectedNetworks">
+        <item>14</item>
+        <item>15</item>
+    </integer-array>
+
     <!-- This string array should be overridden by the device to present a list of radio
          attributes.  This is used by the connectivity manager to decide which networks can coexist
          based on the hardware -->
@@ -56,30 +61,31 @@
          USB interfaces.  If the device doesn't want to support tething over USB this should
          be empty.  An example would be "usb.*" -->
     <string-array translatable="false" name="config_tether_usb_regexs">
+        <item>"rndis0"</item>
     </string-array>
 
     <!-- Array of allowable ConnectivityManager network types for tethering -->
     <integer-array translatable="false" name="config_tether_upstream_types">
+        <item>1</item>
+        <item>7</item>
     </integer-array>
 
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
          Wifi interfaces.  If the device doesn't want to support tethering over Wifi this
          should be empty.  An example would be "softap.*" -->
     <string-array translatable="false" name="config_tether_wifi_regexs">
-<item>"wlan.*"</item>
-    </string-array>
+        <item>"wlan0"</item>
+   </string-array>
 
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
          bluetooth interfaces.  If the device doesn't want to support tethering over bluetooth this
          should be empty. -->
     <string-array translatable="false" name="config_tether_bluetooth_regexs">
+           <item>"bt-pan"</item>
     </string-array>
 
     <!-- Boolean indicating whether the wifi chipset has dual frequency band support -->
     <bool translatable="false" name="config_wifi_dual_band_support">false</bool>
-
-    <!-- Boolean indicating whether the wifi chipset has background scan support -->
-    <bool translatable="false" name="config_wifi_background_scan_support">true</bool>
 
     <!-- Device type information conforming to Annex B format in WiFi Direct specification.
     The default represents a dual-mode smartphone -->
@@ -95,7 +101,7 @@
     <string-array name="config_usbHostBlacklist">
         <!--  
    -->
-  
+        <item>/dev/bus/usb/001</item>
     </string-array>
 
     <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
@@ -213,6 +219,13 @@
           -->
     <dimen name="config_viewConfigurationTouchSlop">12dp</dimen>
 
+    <string-array name="config_locationProviderPackageNames" translatable="false">
+        <!-- The Google provider -->
+        <item>com.google.android.gms</item>
+        <!-- The standard AOSP fused location provider -->
+        <item>com.android.location.fused</item>
+    </string-array>
+
     <!-- Separate software navigation bar required on this device. -->
     <bool name="config_showNavigationBar">true</bool>
 
@@ -240,20 +253,57 @@
     <integer name="config_safe_media_volume_index">6</integer>
 
     <!-- Set lowmemorykiller threshold -->
-    <integer name="config_lowMemoryKillerMinFreeKbytesAbsolute">16384</integer>
+    <integer name="config_lowMemoryKillerMinFreeKbytesAbsolute">-1</integer>
+    <integer name="config_lowMemoryKillerMinFreeKbytesAdjust">0</integer>
+
+   <!-- Enable doze mode
+         ComponentName of a dream to show whenever the system would otherwise have gone to sleep. -->
+    <string name="config_dozeComponent">com.android.systemui/com.android.systemui.doze.DozeService</string>
+
+    <!-- If true, the doze component is not started until after the screen has been turned off
+         and the screen off animation has been performed. -->
+    <bool name="config_dozeAfterScreenOff">true</bool>
 
     <!-- Enable doze powersaving -->
     <bool name="config_enableAutoPowerModes">true</bool>
 
-    <string-array name="config_locationProviderPackageNames" translatable="false">
-        <!-- The Google provider -->
-        <item>com.google.android.gms</item>
-        <!-- The standard AOSP fused location provider -->
-        <item>com.android.location.fused</item>
-    </string-array>
+    <!-- Flag indicating whether round icons should be parsed from the application manifest. -->
+    <bool name="config_useRoundIcon">true</bool>
+
+    <!-- Power Management: Specifies whether to decouple the auto-suspend state of the
+         device from the display on/off state.
+         When false, autosuspend_disable() will be called before the display is turned on
+         and autosuspend_enable() will be called after the display is turned off.
+         This mode provides best compatibility for devices using legacy power management
+         features such as early suspend / late resume.
+         When true, autosuspend_display() and autosuspend_enable() will be called
+         independently of whether the display is being turned on or off.  This mode
+         enables the power manager to suspend the application processor while the
+         display is on.
+         This resource should be set to "true" when a doze component has been specified
+         to maximize power savings but not all devices support it.
+         Refer to autosuspend.h for details.
+    -->
+    <bool name="config_powerDecoupleAutoSuspendModeFromDisplay">false</bool>
+
+    <!-- Power Management: Specifies whether to decouple the interactive state of the
+         device from the display on/off state.
+         When false, setInteractive(..., true) will be called before the display is turned on
+         and setInteractive(..., false) will be called after the display is turned off.
+         This mode provides best compatibility for devices that expect the interactive
+         state to be tied to the display state.
+         When true, setInteractive(...) will be called independently of whether the display
+         is being turned on or off.  This mode enables the power manager to reduce
+         clocks and disable the touch controller while the display is on.
+         This resource should be set to "true" when a doze component has been specified
+         to maximize power savings but not all devices support it.
+         Refer to power.h for details.
+    -->
+    <bool name="config_powerDecoupleInteractiveModeFromDisplay">false</bool>
+
+    <!-- Whether to enable HumanInteractionController by default -->
+    <bool name="config_HICEnabledDefault">false</bool>
 
     <!-- Whether device supports double tap to wake -->
-    <!-- <bool name="config_supportDoubleTapWake">true</bool> -->
-
-    <bool name="config_cameraDoubleTapPowerGestureEnabled">false</bool>
+    <bool name="config_supportDoubleTapWake">true</bool>
 </resources>

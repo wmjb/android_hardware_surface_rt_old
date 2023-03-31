@@ -4,11 +4,12 @@
 # specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
 
 
-/dev/block/platform/sdhci-tegra.3/by-name/APP           /system             ext4      ro                                                            wait
-/dev/block/platform/sdhci-tegra.3/by-name/CAC           /cache              ext4      noatime,nosuid,nodev,nomblk_io_submit,errors=panic    wait,check
-/dev/block/platform/sdhci-tegra.3/by-name/UDA           /data               ext4      noatime,nosuid,nodev,nomblk_io_submit,errors=panic    wait,check,encryptable=footer
-/dev/block/platform/sdhci-tegra.3/by-name/MSC           /misc               emmc      defaults                                                      defaults
-/dev/block/platform/sdhci-tegra.3/by-name/LNX           /boot               emmc      defaults                                                      defaults
-/dev/block/platform/sdhci-tegra.3/by-name/SOS           /recovery           emmc      defaults                                                      defaults
-/dev/block/platform/sdhci-tegra.3/by-name/USP           /staging            emmc      defaults                                                      defaults
+/dev/block/mmcblk0p3           /system             ext4      ro                                                            wait
+/dev/block/mmcblk0p4           /cache              ext4      noatime,nosuid,nodev,nomblk_io_submit,errors=panic    wait,check
+/dev/block/mmcblk0p8           /data               ext4      noatime,nosuid,nodev,nomblk_io_submit,errors=panic    wait,check,encryptable=footer
+/dev/block/mmcblk0p5            /misc               emmc      defaults                                                      defaults
+/dev/block/mmcblk0p2           /boot               ext4      defaults                                                      defaults
+/dev/block/mmcblk0p7           /recovery           emmc      defaults                                                      defaults
+/dev/block/mmcblk0p6          /staging            emmc       defaults                                                      defaults
+#/dev/block/mmcblk1p3		swap		  swap	     defaults		swapprio=1, 0		 0 
 /devices/platform/tegra-ehci.0/usb*                     auto                vfat      defaults        voldmanaged=usb:auto

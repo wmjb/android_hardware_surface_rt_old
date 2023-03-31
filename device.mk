@@ -14,9 +14,6 @@
 # limitations under the License.
 #
 
-PRODUCT_PROPERTY_OVERRIDES := \
-    ro.carrier=wifi-only
-
 PRODUCT_COPY_FILES := \
     device/asus/grouper/fstab.grouper:root/fstab.grouper \
     device/asus/grouper/init.grouper.rc:root/init.grouper.rc
@@ -24,16 +21,9 @@ PRODUCT_COPY_FILES := \
 # the actual meat of the device-specific product definition
 $(call inherit-product, device/asus/grouper/device-common.mk)
 
-# inherit from the non-open-source side, if present
-$(call inherit-product-if-exists, vendor/asus/grouper/device-vendor.mk)
-
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.carrier=wifi-only
+    ro.carrier=wifi-only \
+    ro.radio.noril=true
 
 DEVICE_PACKAGE_OVERLAYS := \
     device/asus/grouper/overlay
-
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.build.version.updater=nAOSProm-7.0-grouper-b$(ROM_BUILD_NUM) \
-    persist.rom.updater.uri=http://bit.ly/2cqLLU2
-

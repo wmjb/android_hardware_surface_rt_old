@@ -1,3 +1,14 @@
 # Kernel bug for Linux < 3.3: sysfs inodes can lose their security context
 # and revert to the base sysfs type.
 allow rild sysfs:file write;
+allow rild ctl_rildaemon_prop:property_service set;
+allow rild zygote_exec:file getattr;
+allow rild zygote_exec:file execute;
+allow rild zygote_exec:file { read open };
+allow rild zygote_exec:file execute_no_trans;
+allow rild debugfs:file write;
+allow rild self:process execmem;
+allow rild servicemanager:binder call;
+allow rild ashmem_device:chr_file execute;
+allow rild debugfs:file open;
+
