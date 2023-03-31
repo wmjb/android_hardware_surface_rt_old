@@ -1,1 +1,0 @@
-allow kernel sensors_data_file:dir search;
